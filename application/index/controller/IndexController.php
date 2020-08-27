@@ -8,7 +8,7 @@ class IndexController
 {
     public function index()
     {
-    	echo 'swoole主页';
+    	echo 'swoole';
     }
 
 
