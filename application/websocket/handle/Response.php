@@ -21,14 +21,14 @@ class Response
             'data' => empty($data) ? new \stdClass() : $data,
         ];
         $messge = json_encode($data, JSON_UNESCAPED_UNICODE);
-        echo "[send] fd:{$fd} recv_error ".$messge . "\n";
+        echo date('Y-m-d H:i:s')." [send] fd:{$fd} recv_error ".$messge . "\n";
         $server->push((int)$fd, json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 
     public function send($server, $fd, $action, $data)
     {
         $messge = json_encode(['action'=>$action, 'data'=>$data], JSON_UNESCAPED_UNICODE);
-        echo "[send] fd:{$fd} {$action} ".$messge . "\n";
+        echo date('Y-m-d H:i:s')." [send] fd:{$fd} {$action} ".$messge . "\n";
         $server->push((int)$fd, $messge);
     }
 

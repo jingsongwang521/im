@@ -100,13 +100,5 @@ class ChatModel
         }
     }
 
-    public function getChatList($im_id)
-    {
 
-    }
-
-    public function updateChatList($im_id)
-    {
-
-    }
 }

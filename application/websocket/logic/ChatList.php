@@ -68,6 +68,7 @@ class ChatList
                 } else {
                     $type = 'other_list';
                 }
+                $v['connect_id'] = $connect->getChatConncetId($v['chat_id']);
                 $v['uid'] = $im_arr[$v['im_id']]['uid'];
                 $v['nickname'] = $im_arr[$v['im_id']]['nickname'];
                 $v['avatar'] = $im_arr[$v['im_id']]['avatar'];

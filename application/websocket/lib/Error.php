@@ -18,6 +18,7 @@ class Error {
     const CHAT_USER_NOT_EXIST = 'chat_user_not_exist';
     const USER_NOT_IN_CHAT = 'user_not_in_chat';
     const INIT_CHAT_FAILED = 'init_chat_failed';
+    const CHAT_CONNECT_FAILED = 'chat_connect_failed';
     const CHAT_USER_OFFLINE = 'chat_user_offline';
     const CHAT_NOT_EXIST = 'chat_not_exist';
     const USER_INIT_FAILED = 'user_init_failed';
@@ -38,7 +39,8 @@ class Error {
         self::CHAT_USER_OFFLINE => '聊天对象未在线',
         self::CHAT_NOT_EXIST => '聊天不存在',
         self::USER_NOT_IN_CHAT => '用户不在聊天中',
-        self::USER_INIT_FAILED => '用户初始化失败'
+        self::USER_INIT_FAILED => '用户初始化失败',
+        self::CHAT_CONNECT_FAILED => '聊天连接建立失败'
 
 
     ];

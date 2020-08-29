@@ -37,18 +37,18 @@ class Connect
      */
     public function addChannel($connect_id, $chat_id, $im_id1, $im_id2, $fd1, $fd2, $from_im_id, $to_im_id)
     {
-            WebSocketServer::$channel_list[$connect_id] = [
-                'chat_id' => $chat_id,
-                'connect_id' => $connect_id,
-                'im_id1' => $im_id1,
-                'im_id2' => $im_id2,
-                'fd1' => $fd1,
-                'fd2' => $fd2,
-                'from_im_id' => $from_im_id,
-                'to_im_id' => $to_im_id,
-                'connect_time' => time(),
-                'last_time' => time()
-            ];
+        WebSocketServer::$channel_list[$connect_id] = [
+            'chat_id' => $chat_id,
+            'connect_id' => $connect_id,
+            'im_id1' => $im_id1,
+            'im_id2' => $im_id2,
+            'fd1' => $fd1,
+            'fd2' => $fd2,
+            'from_im_id' => $from_im_id,
+            'to_im_id' => $to_im_id,
+            'connect_time' => time(),
+            'last_time' => time()
+        ];
     }
 
     /**
@@ -61,6 +61,50 @@ class Connect
         }
     }
 
+    public function removeChannel($im_id, $fd=0)
+    {
+        $remove_keys = [];
+        foreach (WebSocketServer::$channel_list as $k => $v) {
+            if($fd == 0) {
+                if($v['im_id1'] == $im_id || $v['im_id2'] == $im_id) {
+                    $remove_keys[] = $k;
+                }
+            } else {
+                if(($v['im_id1'] == $im_id && $v['fd1'] != $fd)
+                    || ($v['im_id2'] == $im_id && $v['fd2'] != $fd)
+                ) {
+                    $remove_keys[] = $k;
+                }
+            }
+        }
+        if(!empty($remove_keys)) {
+            foreach ($remove_keys as $v_key) {
+                unset(WebSocketServer::$channel_list[$v_key]);
+            }
+            return count($remove_keys);
+        } else {
+            return 0;
+        }
+    }
+
+    public function removeChannelByFd($fd)
+    {
+        $remove_keys = [];
+        foreach (WebSocketServer::$channel_list as $k => $v) {
+            if($v['fd1'] == $fd || $v['fd2'] == $fd) {
+                $remove_keys[] = $k;
+            }
+        }
+        if(!empty($remove_keys)) {
+            foreach ($remove_keys as $v_key) {
+                unset(WebSocketServer::$channel_list[$v_key]);
+            }
+            return count($remove_keys);
+        } else {
+            return false;
+        }
+    }
+
     /**
      * 刷新在线列表
      * @param $fd
@@ -68,25 +112,36 @@ class Connect
      */
     public function refreshOnline($fd, $im_info)
     {
-        if(!isset(WebSocketServer::$online_list[(string)$im_info['_id']])) {
-            WebSocketServer::$online_list[(string)$im_info['_id']] = [
+        $im_id = (string)$im_info['_id'];
+        $this->removeChannel($im_id, $fd);
+
+        if(!isset(WebSocketServer::$online_list[$im_id])) {
+            WebSocketServer::$online_list[$im_id] = [
                 'fd' => $fd,
-                'im_id' => (string)$im_info['_id'],
+                'im_id' => $im_id,
                 'uid' => $im_info['uid'],
+                'nickname' => $im_info['nickname'],
+                'avatar' => $im_info['avatar'],
                 'user_type' => $im_info['user_type'],
                 'online_time' => time(),
                 'last_time' => time(),
             ];
         } else {
-            WebSocketServer::$online_list[(string)$im_info['_id']] = [
+            $online_time = WebSocketServer::$online_list[$im_id]['online_time'];
+            WebSocketServer::$online_list[$im_id] = [
                 'fd' => $fd,
                 'im_id' => (string)$im_info['_id'],
                 'uid' => $im_info['uid'],
+                'nickname' => $im_info['nickname'],
+                'avatar' => $im_info['avatar'],
                 'user_type' => $im_info['user_type'],
+                'online_time' => $online_time,
                 'last_time' => time(),
             ];
         }
     }
+
+
 
     /**
      * 删除在线列表
@@ -96,6 +151,29 @@ class Connect
     public function removeOnline($im_id)
     {
         unset(WebSocketServer::$online_list[$im_id]);
+    }
+
+    /**
+     * 删除在线列表
+     * @param $fd
+     * @param $im_info
+     */
+    public function removeOnlineByFd($fd)
+    {
+        $remove_keys = [];
+        foreach (WebSocketServer::$online_list as $k => $v) {
+            if($v['fd'] == $fd) {
+                $remove_keys[] = $k;
+            }
+        }
+        if(!empty($remove_keys)) {
+            foreach ($remove_keys as $v_key) {
+                unset(WebSocketServer::$online_list[$v_key]);
+            }
+            return count($remove_keys);
+        } else {
+            return 0;
+        }
     }
 
     public function isOnline($im_id) {
@@ -123,6 +201,18 @@ class Connect
         }
         return $channel_info;
     }
+
+    public function getChatConncetId($chat_id)
+    {
+        $channel_info = $this->getChatChannel($chat_id);
+        if(!empty($channel_info)) {
+            $connect_id = $channel_info['connect_id'];
+        } else {
+            $connect_id = '';
+        }
+        return $connect_id;
+    }
+
 
     public function getOnlineUserFd($im_id)
     {
